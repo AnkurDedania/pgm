@@ -1,17 +1,35 @@
-pogom:
-  restart: always
-  build: pogom
-  expose:
-    - 5000
-  volumes:
-    - /usr/src/app/static
-
-nginx:
-  restart: always
-  build: nginx
-  ports:
-    - 80:80
-  volumes_from:
-    - pogom
-  links:
-    - pogom:pogom
+version: "2"
+services:
+  torproxy:
+    image: jess/tor-proxy
+    expose:
+      - "9050"
+    restart: "always"
+  privoxy:
+    image: jess/privoxy
+    links:
+      - torproxy
+    expose:
+      - "8118"
+    restart: always
+  pogom:
+    restart: always
+    build: pogom
+    links: 
+      - privoxy
+    environment:
+      - HTTPS_PROXY=privoxy:8118
+      - HTTP_PROXY=privoxy:8118
+    expose:
+      - "5000"
+    volumes:
+      - /usr/src/app/static
+  nginx:
+    restart: always
+    build: nginx
+    ports:
+      - "80:80"
+    volumes_from:
+      - pogom
+    links:
+      - pogom:pogom
