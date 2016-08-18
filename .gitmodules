@@ -1,0 +1,3 @@
+[submodule "pogom"]
+	path = pogom
+	url = https://github.com/favll/pogom
